@@ -432,6 +432,7 @@ export const Bot = (botProps: BotProps & { class?: string }) => {
     const body: IncomingInput = {
       question: value,
       chatId: chatId(),
+      overrideConfig: {}
     };
 
     if (urls && urls.length > 0) body.uploads = urls;
