@@ -37,6 +37,7 @@ export const AgentReasoningBubble = (props: Props) => {
             'background-color': props.backgroundColor ?? defaultBackgroundColor,
             color: props.textColor ?? defaultTextColor,
             'font-size': props.fontSize ? `${props.fontSize}px` : `${defaultFontSize}px`,
+            direction: 'rtl',
           }}
         />
       )}
