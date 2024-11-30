@@ -5,17 +5,21 @@ import { SendButton } from '@/components/buttons/SendButton';
 import { FileEvent, UploadsConfig } from '@/components/Bot';
 import { ImageUploadButton } from '@/components/buttons/ImageUploadButton';
 import { RecordAudioButton } from '@/components/buttons/RecordAudioButton';
+import { AttachmentUploadButton } from '@/components/buttons/AttachmentUploadButton';
+import { ChatInputHistory } from '@/utils/chatInputHistory';
 
-type Props = {
+type TextInputProps = {
   placeholder?: string;
   backgroundColor?: string;
   textColor?: string;
   sendButtonColor?: string;
-  defaultValue?: string;
+  inputValue: string;
   fontSize?: number;
   disabled?: boolean;
   onSubmit: (value: string) => void;
+  onInputChange: (value: string) => void;
   uploadsConfig?: Partial<UploadsConfig>;
+  isFullFileUpload?: boolean;
   setPreviews: Setter<unknown[]>;
   onMicrophoneClicked: () => void;
   handleFileChange: (event: FileEvent<HTMLInputElement>) => void;
@@ -24,6 +28,8 @@ type Props = {
   autoFocus?: boolean;
   sendMessageSound?: boolean;
   sendSoundLocation?: string;
+  enableInputHistory?: boolean;
+  maxHistorySize?: number;
 };
 
 const defaultBackgroundColor = '#ffffff';
@@ -31,12 +37,13 @@ const defaultTextColor = '#303235';
 // CDN link for default send sound
 const defaultSendSound = 'https://cdn.jsdelivr.net/gh/FlowiseAI/FlowiseChatEmbed@latest/src/assets/send_message.mp3';
 
-export const TextInput = (props: Props) => {
-  const [inputValue, setInputValue] = createSignal(props.defaultValue ?? '');
+export const TextInput = (props: TextInputProps) => {
   const [isSendButtonDisabled, setIsSendButtonDisabled] = createSignal(false);
   const [warningMessage, setWarningMessage] = createSignal('');
+  const [inputHistory] = createSignal(new ChatInputHistory(() => props.maxHistorySize || 10));
   let inputRef: HTMLInputElement | HTMLTextAreaElement | undefined;
   let fileUploadRef: HTMLInputElement | HTMLTextAreaElement | undefined;
+  let imgUploadRef: HTMLInputElement | HTMLTextAreaElement | undefined;
   let audioRef: HTMLAudioElement | undefined;
 
   const handleInput = (inputValue: string) => {
@@ -48,30 +55,51 @@ export const TextInput = (props: Props) => {
       return;
     }
 
-    setInputValue(inputValue);
+    props.onInputChange(inputValue);
     setWarningMessage('');
     setIsSendButtonDisabled(false);
   };
 
-  const checkIfInputIsValid = () => inputValue() !== '' && warningMessage() === '' && inputRef?.reportValidity();
+  const checkIfInputIsValid = () => warningMessage() === '' && inputRef?.reportValidity();
 
   const submit = () => {
     if (checkIfInputIsValid()) {
-      props.onSubmit(inputValue());
+      if (props.enableInputHistory) {
+        inputHistory().addToHistory(props.inputValue);
+      }
+      props.onSubmit(props.inputValue);
       if (props.sendMessageSound && audioRef) {
         audioRef.play();
       }
-      setInputValue('');
     }
   };
 
-  const submitWhenEnter = (e: KeyboardEvent) => {
-    const isIMEComposition = e.isComposing || e.keyCode === 229;
-    if (e.key === 'Enter' && !isIMEComposition && warningMessage() === '') submit();
+  const handleImageUploadClick = () => {
+    if (imgUploadRef) imgUploadRef.click();
   };
 
-  const handleImageUploadClick = () => {
+  const handleFileUploadClick = () => {
     if (fileUploadRef) fileUploadRef.click();
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      const isIMEComposition = e.isComposing || e.keyCode === 229;
+      if (!isIMEComposition) {
+        e.preventDefault();
+        submit();
+      }
+    } else if (props.enableInputHistory) {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const previousInput = inputHistory().getPreviousInput(props.inputValue);
+        props.onInputChange(previousInput);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const nextInput = inputHistory().getNextInput();
+        props.onInputChange(nextInput);
+      }
+    }
   };
 
   createEffect(() => {
@@ -99,6 +127,16 @@ export const TextInput = (props: Props) => {
     if (event.target) event.target.value = '';
   };
 
+  const getFileType = () => {
+    if (props.isFullFileUpload) return '*';
+    if (props.uploadsConfig?.fileUploadSizeAndTypes?.length) {
+      const allowedFileTypes = props.uploadsConfig?.fileUploadSizeAndTypes.map((allowed) => allowed.fileTypes).join(',');
+      if (allowedFileTypes.includes('*')) return '*';
+      else return allowedFileTypes;
+    }
+    return '*';
+  };
+
   return (
     <div
       class="w-full h-auto max-h-[192px] min-h-[56px] flex flex-col items-end justify-between chatbot-input border border-[#eeeeee]"
@@ -108,7 +146,7 @@ export const TextInput = (props: Props) => {
         'background-color': props.backgroundColor ?? defaultBackgroundColor,
         color: props.textColor ?? defaultTextColor,
       }}
-      onKeyDown={submitWhenEnter}
+      onKeyDown={handleKeyDown}
     >
       <Show when={warningMessage() !== ''}>
         <div class="w-full px-4 pt-4 pb-1 text-red-500 text-sm" data-testid="warning-message">
@@ -127,13 +165,45 @@ export const TextInput = (props: Props) => {
             >
               <span style={{ 'font-family': 'Poppins, sans-serif' }}>Image Upload</span>
             </ImageUploadButton>
-            <input style={{ display: 'none' }} multiple ref={fileUploadRef as HTMLInputElement} type="file" onChange={handleFileChange} />
+            <input
+              style={{ display: 'none' }}
+              multiple
+              ref={imgUploadRef as HTMLInputElement}
+              type="file"
+              onChange={handleFileChange}
+              accept={
+                props.uploadsConfig?.imgUploadSizeAndTypes?.length
+                  ? props.uploadsConfig?.imgUploadSizeAndTypes.map((allowed) => allowed.fileTypes).join(',')
+                  : '*'
+              }
+            />
+          </>
+        ) : null}
+        {props.uploadsConfig?.isRAGFileUploadAllowed || props.isFullFileUpload ? (
+          <>
+            <AttachmentUploadButton
+              buttonColor={props.sendButtonColor}
+              type="button"
+              class="m-0 h-14 flex items-center justify-center"
+              isDisabled={props.disabled || isSendButtonDisabled()}
+              on:click={handleFileUploadClick}
+            >
+              <span style={{ 'font-family': 'Poppins, sans-serif' }}>File Upload</span>
+            </AttachmentUploadButton>
+            <input
+              style={{ display: 'none' }}
+              multiple
+              ref={fileUploadRef as HTMLInputElement}
+              type="file"
+              onChange={handleFileChange}
+              accept={getFileType()}
+            />
           </>
         ) : null}
         <ShortTextInput
           ref={inputRef as HTMLTextAreaElement}
           onInput={handleInput}
-          value={inputValue()}
+          value={props.inputValue}
           fontSize={props.fontSize}
           disabled={props.disabled}
           placeholder={props.placeholder ?? 'Type your question'}
