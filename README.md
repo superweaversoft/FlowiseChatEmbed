@@ -197,7 +197,7 @@ You can also customize chatbot with different configuration
         footer: {
           textColor: '#303235',
           text: 'Powered by',
-          company: 'Flowise',
+          company: 'Weaversoft',
           companyLink: 'https://flowiseai.com',
         },
       },
