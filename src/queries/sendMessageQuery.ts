@@ -119,7 +119,7 @@ export const isStreamAvailableQuery = ({ chatflowid, apiHost = 'http://localhost
     onRequest: onRequest,
   });
 
-export const sendFileDownloadQuery = ({ apiHost = 'http://localhost:3000', body, onRequest }: MessageRequest) =>
+export const sendFileDownloadQuery = ({ apiHost = 'https://demo-ui2.app.weaversoft.io', body, onRequest }: MessageRequest) =>
   sendRequest<any>({
     method: 'POST',
     url: `${apiHost}/api/v1/openai-assistants-file/download`,
