@@ -1,8 +1,11 @@
 <script type="module">
-    import Chatbot from 'https://cdn.jsdelivr.net/npm/@birksy89/flowise-embed@latest/dist/web.js';
-    Chatbot.initFull({
-      chatflowid: '123123',
-      apiHost: 'http://localhost:3000',
-    });
-  </script>
-  <flowise-fullchatbot></flowise-fullchatbot>
+  import Chatbot from 'http://localhost:3001/web.js'
+  Chatbot.init({
+      chatflowid: 'your-identifier-here',
+      apiHost: 'http://localhost:3001',
+      headers: {
+        'Authorization': 'Bearer 123',
+      }
+  })
+</script>
+<flowise-fullchatbot></flowise-fullchatbot>

@@ -1,0 +1,10 @@
+services:
+  static_flowise:
+      restart: always
+      build:
+          context: .
+          dockerfile: Dockerfile
+      env_file: .env
+      command: pnpm start
+      ports:
+        - 3002:3001

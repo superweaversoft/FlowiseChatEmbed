@@ -59,7 +59,7 @@ export type LeadCaptureRequest = BaseRequest & {
   body: Partial<LeadCaptureInput>;
 };
 
-export const sendFeedbackQuery = ({ chatflowid, apiHost = 'https://demo-ui2.app.weaversoft.io', body, onRequest }: CreateFeedbackRequest) =>
+export const sendFeedbackQuery = ({ chatflowid, apiHost = 'http://localhost:3000', body, onRequest }: CreateFeedbackRequest) =>
   sendRequest({
     method: 'POST',
     url: `${apiHost}/api/v1/feedback/${chatflowid}`,
@@ -67,7 +67,7 @@ export const sendFeedbackQuery = ({ chatflowid, apiHost = 'https://demo-ui2.app.
     onRequest: onRequest,
   });
 
-export const updateFeedbackQuery = ({ id, apiHost = 'https://demo-ui2.app.weaversoft.io', body, onRequest }: UpdateFeedbackRequest) =>
+export const updateFeedbackQuery = ({ id, apiHost = 'http://localhost:3000', body, onRequest }: UpdateFeedbackRequest) =>
   sendRequest({
     method: 'PUT',
     url: `${apiHost}/api/v1/feedback/${id}`,
@@ -75,7 +75,7 @@ export const updateFeedbackQuery = ({ id, apiHost = 'https://demo-ui2.app.weaver
     onRequest: onRequest,
   });
 
-export const sendMessageQuery = ({ chatflowid, apiHost = 'https://demo-ui2.app.weaversoft.io', body, onRequest }: MessageRequest) =>
+export const sendMessageQuery = ({ chatflowid, apiHost = 'http://localhost:3000', body, onRequest }: MessageRequest) =>
   sendRequest<any>({
     method: 'POST',
     url: `${apiHost}/api/v1/prediction/${chatflowid}`,
@@ -83,7 +83,7 @@ export const sendMessageQuery = ({ chatflowid, apiHost = 'https://demo-ui2.app.w
     onRequest: onRequest,
   });
 
-export const createAttachmentWithFormData = ({ chatflowid, apiHost = 'https://demo-ui2.app.weaversoft.io', formData, onRequest }: UpsertRequest) =>
+export const createAttachmentWithFormData = ({ chatflowid, apiHost = 'http://localhost:3000', formData, onRequest }: UpsertRequest) =>
   sendRequest({
     method: 'POST',
     url: `${apiHost}/api/v1/attachments/${chatflowid}/${formData.get('chatId')}`,
@@ -94,7 +94,7 @@ export const createAttachmentWithFormData = ({ chatflowid, apiHost = 'https://de
     onRequest: onRequest,
   });
 
-export const upsertVectorStoreWithFormData = ({ chatflowid, apiHost = 'https://demo-ui2.app.weaversoft.io', formData, onRequest }: UpsertRequest) =>
+export const upsertVectorStoreWithFormData = ({ chatflowid, apiHost = 'http://localhost:3000', formData, onRequest }: UpsertRequest) =>
   sendRequest({
     method: 'POST',
     url: `${apiHost}/api/v1/vector/upsert/${chatflowid}`,
@@ -105,21 +105,21 @@ export const upsertVectorStoreWithFormData = ({ chatflowid, apiHost = 'https://d
     onRequest: onRequest,
   });
 
-export const getChatbotConfig = ({ chatflowid, apiHost = 'https://demo-ui2.app.weaversoft.io', onRequest }: MessageRequest) =>
+export const getChatbotConfig = ({ chatflowid, apiHost = 'http://localhost:3000', onRequest }: MessageRequest) =>
   sendRequest<any>({
     method: 'GET',
     url: `${apiHost}/api/v1/public-chatbotConfig/${chatflowid}`,
     onRequest: onRequest,
   });
 
-export const isStreamAvailableQuery = ({ chatflowid, apiHost = 'https://demo-ui2.app.weaversoft.io', onRequest }: MessageRequest) =>
+export const isStreamAvailableQuery = ({ chatflowid, apiHost = 'http://localhost:3000', onRequest }: MessageRequest) =>
   sendRequest<any>({
     method: 'GET',
     url: `${apiHost}/api/v1/chatflows-streaming/${chatflowid}`,
     onRequest: onRequest,
   });
 
-export const sendFileDownloadQuery = ({ apiHost = 'https://demo-ui2.app.weaversoft.io', body, onRequest }: MessageRequest) =>
+export const sendFileDownloadQuery = ({ apiHost = 'http://localhost:3000', body, onRequest }: MessageRequest) =>
   sendRequest<any>({
     method: 'POST',
     url: `${apiHost}/api/v1/openai-assistants-file/download`,
@@ -128,7 +128,7 @@ export const sendFileDownloadQuery = ({ apiHost = 'https://demo-ui2.app.weaverso
     onRequest: onRequest,
   });
 
-export const addLeadQuery = ({ apiHost = 'https://demo-ui2.app.weaversoft.io', body, onRequest }: LeadCaptureRequest) =>
+export const addLeadQuery = ({ apiHost = 'http://localhost:3000', body, onRequest }: LeadCaptureRequest) =>
   sendRequest<any>({
     method: 'POST',
     url: `${apiHost}/api/v1/leads/`,
